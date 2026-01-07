@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather_app/logic/cubits/weather/weather_cubit.dart';
-import 'package:weather_app/presentation/screens/search_screen.dart';
 import 'package:weather_app/presentation/widgets/city_part.dart';
 import 'package:weather_app/presentation/widgets/temperature.dart';
+import 'package:weather_app/presentation/widgets/weather_menu.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -83,16 +83,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Positioned(
                   right: 0,
                   top: 40,
-                  child: IconButton(
-                    onPressed: () async {
-                      final _city = await Navigator.of(
-                        context,
-                      ).pushNamed(SearchScreen.routeName);
-                      if (_city != null) {
-                        _getWeather(_city as String);
-                      }
-                    },
-                    icon: Icon(Icons.search, color: Colors.white),
+                  child: WeatherMenu(
+                    imagePath: imagePath,
+                    getWeather: _getWeather,
                   ),
                 ),
                 SafeArea(

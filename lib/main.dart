@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart';
+import 'package:weather_app/logic/cubits/settings/settings_cubit.dart';
 import 'package:weather_app/logic/cubits/weather/weather_cubit.dart';
 import 'package:weather_app/logic/repositories/weather_repository.dart';
 import 'package:weather_app/logic/services/https/weather_api_services.dart';
 import 'package:weather_app/presentation/screens/search_screen.dart';
+import 'package:weather_app/presentation/screens/settings_screen.dart';
 import './presentation/screens/home_screen.dart';
 
 void main() {
@@ -26,6 +28,7 @@ class MyApp extends StatelessWidget {
             create: (ctx) =>
                 WeatherCubit(weatherRepository: ctx.read<WeatherRepository>()),
           ),
+          BlocProvider(create: (ctx) => SettingsCubit()),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -34,7 +37,10 @@ class MyApp extends StatelessWidget {
             colorScheme: .fromSeed(seedColor: Colors.deepPurple),
           ),
           home: const HomeScreen(),
-          routes: {SearchScreen.routeName: (ctx) => SearchScreen()},
+          routes: {
+            SearchScreen.routeName: (ctx) => SearchScreen(),
+            SettingsScreen.routName: (ctx) => const SettingsScreen(),
+          },
         ),
       ),
     );
