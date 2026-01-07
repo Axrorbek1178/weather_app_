@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:weather_app/helpers/extensions/string_extension.dart';
 import 'package:weather_app/logic/cubits/weather/weather_cubit.dart';
+import 'package:weather_app/presentation/screens/search_screen.dart';
+import 'package:weather_app/presentation/widgets/city_part.dart';
+import 'package:weather_app/presentation/widgets/temperature.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,16 +16,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<WeatherCubit>().getWeather('london');
+    _getWeather('london');
+  }
+
+  void _getWeather(String city) {
+    context.read<WeatherCubit>().getWeather(city);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocConsumer<WeatherCubit, WeatherState>(
-        listener: (ctx, state) {
+        listener: (ctx, state) async {
           if (state is WeatherError) {
-            showDialog(
+            await showDialog(
               context: context,
               builder: (ctx) {
                 return AlertDialog(
@@ -40,6 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             );
+            if (state.message.toLowerCase().contains('not found')) {
+              _getWeather('london');
+            }
           }
         },
         builder: (ctx, state) {
@@ -71,6 +80,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: double.infinity,
                 ),
                 Container(color: Colors.black.withAlpha(100)),
+                Positioned(
+                  right: 0,
+                  top: 40,
+                  child: IconButton(
+                    onPressed: () async {
+                      final _city = await Navigator.of(
+                        context,
+                      ).pushNamed(SearchScreen.routeName);
+                      if (_city != null) {
+                        _getWeather(_city as String);
+                      }
+                    },
+                    icon: Icon(Icons.search, color: Colors.white),
+                  ),
+                ),
                 SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -78,56 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              weather.city.capitalizeString(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 50,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              weather.desc,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-
-                          children: [
-                            Text(
-                              '${weather.temperature.toStringAsFixed(0)} ℃',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 70,
-                                height: 0.1,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Image.network(
-                                  'https://openweathermap.org/img/wn/${weather.icon}@2x.png',
-                                ),
-                                Text(
-                                  weather.main,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                        CityPart(weather: weather),
+                        Temperature(weather: weather),
                       ],
                     ),
                   ),
